@@ -146,7 +146,7 @@ metadata {
         valueTile("temperature", "device.temperature", width: 1, height: 1, canChangeIcon: true) {
              state("temperature", label: '${currentValue}°', unit:"F}", backgroundColors: [
                  [value: 31, color: "#153591"],
-    			 [value: 44, color: "#1e9cbb"],
+    		 	 [value: 44, color: "#1e9cbb"],
                  [value: 59, color: "#90d2a7"],
             	 [value: 74, color: "#44b621"],
                  [value: 84, color: "#f1d801"],
@@ -260,10 +260,7 @@ metadata {
                     "refresh","programEndTimeMsg",
                     "programCoolTemp", "coolLevelDown", "coolLevelUp",
                     "programHeatTemp", "heatLevelDown", "heatLevelUp", 
-                    "resProgram", "alerts",
-               	/* 	"weatherCondition", "weatherTemperature", "weatherRelativeHumidity", 
-                	"weatherTempHigh", "weatherTempLow", "weatherPressure", 
-                    "weatherWindDirection", "weatherWindSpeed", "weatherPop", */ 
+                    "resProgram", "alerts"
                	])
     }
 }
@@ -335,7 +332,6 @@ def heatLevelDown(){
     setHeatingSetpoint(nextLevel)
 }
 
-
 // handle commands
 def setHeatingSetpoint(temp) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),temp,null, null)
@@ -352,11 +348,9 @@ def off() {
     setThermostatMode('off')
 }
 
-
 def auto() {
     setThermostatMode('auto')
 }
-
 
 def heat() {
     setThermostatMode('heat')
@@ -393,7 +387,6 @@ def fanOff() { // fanOff is not supported, setting it to 'auto' instead.
     setThermostatFanMode('auto')
 }
 
-
 def setFanMinOnTime(minutes) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
         device.currentValue("thermostatFanMode"),['fanMinOnTime':"${minutes}"])
@@ -417,11 +410,9 @@ def dehumidifierOn() {
     setDehumidifierMode('on')
 }
 
-
 def dehumidifierOff() {
     setDehumidifierMode('off')
 }
-
  
 def setDehumidifierMode(mode) {
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"), device.currentValue("heatingSetpoint"),
@@ -448,8 +439,6 @@ def setHumidifierMode(mode) {
           null,['humidifierMode':"${mode}"])
     sendEvent(name: 'humidifierMode', value: mode)
 }
- 
- 
 
 def setHumidifierLevel(level) {   
     setHold(settings.thermostatId, device.currentValue("coolingSetpoint"),device.currentValue("heatingSetpoint"),
@@ -459,7 +448,6 @@ def setHumidifierLevel(level) {
 
 // parse events into attributes
 def parse(String description) { }
-
 
 // Climates (ecobee's name for "Programs") - currently only support the original 4 ecobee defaults (Awake, Away, 
 // Home, Sleep) which map to ST's defaults (Good Morning!, Goodbye, I'm Back, and Night - we generally fudge Good 
@@ -629,7 +617,6 @@ def poll() {
 		sendEvent(name: 'programHeatTemp', value: (currentClimate.heatTemp/10), unit: "F")
     }
     def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0)? data.thermostatList[0].equipmentStatus + ' running': 'Idle'
-    
     sendEvent(name: 'equipementStatus', value: equipStatus)
 
 	def currentMode = data.thermostatList[0].settings.hvacMode
@@ -655,7 +642,6 @@ def poll() {
 
     // post alerts
     def alerts = null
-    
     if (data.thermostatList[0].alerts.size() > 0) {     
         alerts = 'Alert(s) '
         for (i in 0..data.thermostatList[0].alerts.size()-1) {
@@ -671,26 +657,20 @@ def poll() {
     sendEvent(name: 'alerts', value: alerts)
 /*
 	// post group(s)
-
     def groupList = 'No groups'
     
     // by default, the ecobeeType is registered (SMART & SMART-SI thermostats)
-    
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     
     if (ecobeeType.toUpperCase() == 'REGISTERED') {
-    
         log.debug "poll> about to execute getGroups"
         sendEvent name: "verboseTrace", value: "poll> about to execute getGroups"
         
         // get Groups associated to this thermostatId
-        
         getGroups(settings.thermostatId)
          
         // post group names associated to this thermostatId
-
         if (data.groups.size() > 0) {
-            
             groupList = 'Group(s) '
             for (i in 0..data.groups.size()-1) {
                 groupList = (i>0) ? ' \n' + groupList + data.groups[i].groupName: groupList + data.groups[i].groupName
@@ -710,7 +690,6 @@ def poll() {
 def refresh() {
      poll()
 }
-
 
 def resumeThisTstat() {
      resumeProgram(settings.thermostatId)
@@ -798,7 +777,6 @@ def doRequest(uri, args, type, success) {
         sendEvent name: "verboseTrace", value: "doRequest> general or malformed request body error " + params.body
     }
 }
-
 
 // tstatType =managementSet or registered (no spaces). May also be set to a specific locationSet (ex. /Toronto/Campus/BuildingA)
 // registered is for SMART thermostat,
@@ -1049,7 +1027,6 @@ def iterateCreateVacation(tstatType, vacationName, targetCoolTemp, targetHeatTem
             else {
                 tstatlist = tstatlist + "," + Id
                 nTstats=nTstats+1
-
             }             
         }
     }
@@ -1109,7 +1086,6 @@ def createVacation(thermostatId, vacationName, targetCoolTemp, targetHeatTemp, t
 }
 
 // tstatType =managementSet or registered (no spaces). May also be set to a specific locationSet (ex./Toronto/Campus/BuildingA)
-
 def iterateDeleteVacation(tstatType, vacationName) {
     Integer MAX_TSTAT_BATCH=25
     def tstatlist=null
@@ -1117,14 +1093,11 @@ def iterateDeleteVacation(tstatType, vacationName) {
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) { // by default, the ecobee type is 'registered'
-    
         ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
     }
     else {
-         
         ecobeeType = tstatType.trim()
     }
-    
     
     getThermostatSummary(ecobeeType)
     
@@ -1133,7 +1106,6 @@ def iterateDeleteVacation(tstatType, vacationName) {
     sendEvent name: "verboseTrace", value: "iterateDeleteVacation>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }
     for (i in 0..data.thermostatCount-1) {
-    
         def thermostatDetails = data.revisionList[i].split(':')
         def Id = thermostatDetails[0]
         def thermostatName = thermostatDetails[1]
@@ -1161,19 +1133,14 @@ def iterateDeleteVacation(tstatType, vacationName) {
                 tstatlist = tstatlist + "," + Id
                 nTstats=nTstats+1
             }
-             
          }
-    
     }
-   
 }
 
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"')
-
 def deleteVacation(thermostatId, vacationName) {
      
     def vacationParams = [name:vacationName.trim()]
-    
     def bodyReq = build_body_request('deleteVacation', null, thermostatId, vacationParams, null)
     
     if (settings.trace) {
@@ -1184,13 +1151,10 @@ def deleteVacation(thermostatId, vacationName) {
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
         if (!statusCode) {
-            
             if (settings.trace) {
-            
                 log.debug "deleteVacation>${vacationName} deleted done for ${thermostatId}"
      			sendEvent name: "verboseTrace", value: "deleteVacation>done for ${thermostatId}"
             }
-            
         }
         else {
             log.error "deleteVacation> error= ${statusCode.toString()}, message = ${message}"
@@ -1208,11 +1172,9 @@ def iterateResumeProgram(tstatType) {
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) { // by default, the ecobee type is 'registered'
-    
         ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
     }
     else {
-         
         ecobeeType = tstatType.trim()
     }
     
@@ -1223,7 +1185,6 @@ def iterateResumeProgram(tstatType) {
     sendEvent name: "verboseTrace", value: "iterateResumeProgram>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }
     for (i in 0..data.thermostatCount-1) {
-    
         def thermostatDetails = data.revisionList[i].split(':')
         def Id = thermostatDetails[0]
         def thermostatName = thermostatDetails[1]
@@ -1239,13 +1200,12 @@ def iterateResumeProgram(tstatType) {
             }
             if ((nTstats > MAX_TSTAT_BATCH) || (i==(data.thermostatCount-1))){ // process a batch of maximum 25 thermostats according to API doc
                 if (settings.trace) {
-       sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
+       				sendEvent name: "verboseTrace", value: "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
                     log.debug "iterateResumeProgram> about to call resumeProgram for ${tstatlist}"
                 }
                 resumeProgram(tstatlist)
                 tstatlist = Id
                 nTstats=1
-             
             }
             else {
                 tstatlist = tstatlist + "," + Id
@@ -1258,16 +1218,13 @@ def iterateResumeProgram(tstatType) {
 // thermostatId may be a list of serial# separated by ",", no spaces (ex. '"123456789012","123456789013"')
 
 def resumeProgram(thermostatId) {
-       
     def bodyReq = build_body_request('resumeProgram', null, thermostatId, null, null)
 
     if (settings.trace) {
         log.debug "resumeProgram> about to call api with body = ${bodyReq} for ${thermostatId}"
     }
     
-
     // do the resumeProgram 3 times to make sure it is resumed.
-    
     api('resumeProgram', bodyReq) {
         sendEvent name: "verboseTrace", value: "resumeProgram> 1st done for ${thermostatId}"
     }
@@ -1278,9 +1235,7 @@ def resumeProgram(thermostatId) {
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
         if (!statusCode) {
-            
             if (settings.trace) {
-            
                 log.debug "resumeProgram> final resume done for ${thermostatId}"
                 sendEvent name: "verboseTrace", value: "resumeProgram> final resume done for ${thermostatId}"
             }     
@@ -1297,13 +1252,11 @@ def resumeProgram(thermostatId) {
 // thermostatId may only be 1 thermostat (not a list) or null (for all groups)
 
 def getGroups(thermostatId) {
-
     
     if (settings.trace) {
         log.debug "getGroups> about to assemble bodyReq thermostatId = ${thermostatId}, settings = ${settings}..."
         sendEvent name: "verboseTrace", value: "getGroups> about to assemble bodyReq thermostatId = ${thermostatId},settings = ${settings}..."
     }
-
     
     def ecobeeType= ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim():'registered'
     
@@ -1325,7 +1278,6 @@ def getGroups(thermostatId) {
         def message = resp.data.status.message
         
         if (!statusCode) {
-  
             data.groups = resp.data.groups
             if (settings.trace) {
             
@@ -1339,7 +1291,6 @@ def getGroups(thermostatId) {
                 return
             }
             if ((thermostatId != null) && (thermostatId != "")) {
-                           
                 def groupData=null
                 if (settings.trace) {
             
@@ -1348,19 +1299,16 @@ def getGroups(thermostatId) {
                 }
         
                 if (data.groups.thermostats.size() > 0) {
-
                     for (i in 0..data.groups.size()-1) {
                         for (j in 0..data.groups.thermostats.size()-1) {
                             if (data.groups[i].thermostats[j] == thermostatId) {
                                 if (settings.trace) {
-            
                                     log.debug "getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
                                     sendEvent name: "verboseTrace", value: "getGroups>found group ${data.groups[i]} for thermostatId= ${thermostatId}"
                                 }
                             }
                             else {
                                 data.groups[i] = ' ' // Not the right group for this thermostat, set it to blanks
-                            
                             }
                         }
                     }
@@ -1371,10 +1319,7 @@ def getGroups(thermostatId) {
             log.error "getGroups>> error=${statusCode.toString()}, message = ${message}"
      		sendEvent name: "verboseTrace", value: "getGroups>error ${statusCode.toString()} for ${thermostatId}"
         }
-    
     }
-    
-
 }
 
 // Only valid for Smart and Antenna thermostats
@@ -1382,7 +1327,6 @@ def getGroups(thermostatId) {
 // thermostatId may only be 1 thermostat (not a list), if null or empty, then defaulted to this thermostatId (settings)
 // groupSettings may be a map of settings separated by ",", no spaces;
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
-
 
 def iterateUpdateGroup(thermostatId, groupSettings=[]) {
 
@@ -1399,7 +1343,6 @@ def iterateUpdateGroup(thermostatId, groupSettings=[]) {
         return
     }
     for (i in 0..data.groups.size()-1) {
-    
    		def groupName = data.groups[i].groupName
         def groupRef = data.groups[i].groupRef
         def synchronizeSchedule = data.groups[i].synchronizeSchedule
@@ -1432,11 +1375,9 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
     def groupSettingsJson = new JsonBuilder(groupSettings)
     def groupSet = groupSettingsJson.toString().minus('{').minus('}')
     
-      
     if ((thermostatId == null) || (thermostatId == "")) {
         thermostatId = settings.thermostatId
     }
-    
     
     if (settings.trace) {
         log.debug "updateGroup> about to assemble bodyReq for groupName =${groupName}, thermostatId = ${thermostatId}, groupSettings=${groupSet}..."
@@ -1449,10 +1390,8 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
            '",' + groupSet + ',"thermostats":["' + thermostatId + '"]'
     }
     else {
-    
    
         updateGroupParams = '"groupName":"' + groupName.trim() + '",' + groupSet + ',"thermostats":["' + thermostatId + '"]'
-    
     }
     if (settings.trace) {
         log.debug "updateGroup> updateGroupParams=${updateGroupParams}"
@@ -1467,16 +1406,14 @@ def updateGroup(groupRef, groupName, thermostatId, groupSettings=[]) {
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
         if (!statusCode) {
-  
             if (settings.trace) {
-            
                 log.debug "updateGroup>done for groupName =${groupName}, ${thermostatId}"
                 sendEvent name: "verboseTrace", value: "updateGroup>done for groupName =${groupName}, ${thermostatId}"
             }
         }
         else {
             log.error "updateGroup> error=${statusCode.toString()}, message = ${message}"
-     sendEvent name: "verboseTrace", value: "updateGroup>error ${statusCode.toString()} for ${thermostatId}"
+     		sendEvent name: "verboseTrace", value: "updateGroup>error ${statusCode.toString()} for ${thermostatId}"
         }
     }
 }
@@ -1487,7 +1424,6 @@ def deleteGroup(groupRef, groupName) {
     String updateGroupParams
     
     if ((groupRef != null) && (groupRef !="")) {
-   
         updateGroupParams = '"groupRef":"' + groupRef.trim() + '","groupName":"' + groupName.trim() + '"'
     }
     else {
@@ -1506,9 +1442,7 @@ def deleteGroup(groupRef, groupName) {
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
         if (!statusCode) {
-  
             if (settings.trace) {
-            
                 log.debug "deleteGroup>done for groupName =${groupName}, groupRef = ${groupRef}"
                 sendEvent name: "verboseTrace", value: "deleteGroup>done for groupName =${groupName},groupRef = ${groupRef}"
             }
@@ -1527,7 +1461,6 @@ def deleteGroup(groupRef, groupName) {
 // For more details, see https://beta.ecobee.com/home/developer/api/documentation/v1/objects/Group.shtml
 
 def createGroup(groupName, thermostatId, groupSettings=[]) {
-    
     updateGroup(null, groupName, thermostatId, groupSettings)
 }
 
@@ -1538,7 +1471,6 @@ def createGroup(groupName, thermostatId, groupSettings=[]) {
 // coolFan & heatFan's mode is 'auto' or 'on'
 
 def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, coolFan, heatFan) {
-
     updateClimate(thermostatId, climateName, 'false', null, coolTemp, heatTemp, isOptimized, coolFan, heatFan)
 }
 
@@ -1546,7 +1478,6 @@ def createClimate(thermostatId, climateName, coolTemp, heatTemp, isOptimized, co
 // climate name is the name of the climate to be deleted (ex. "Bedtime").
 
 def deleteClimate(thermostatId, climateName, substituteClimateName) {
-
     updateClimate(thermostatId, climateName, 'true', substituteClimateName, null, null, null, null, null)
 }
 
@@ -1560,14 +1491,11 @@ def iterateSetClimate(tstatType, climateName) {
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) { // by default, the ecobee type is 'registered'
-    
         ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
     }
     else {
-         
         ecobeeType = tstatType.trim()
     }
-    
     
     getThermostatSummary(ecobeeType)
     if (settings.trace) {
@@ -1575,7 +1503,6 @@ def iterateSetClimate(tstatType, climateName) {
     	sendEvent name: "verboseTrace", value: "iterateSetClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }
     for (i in 0..data.thermostatCount-1) {
-    
         def thermostatDetails = data.revisionList[i].split(':')
         def Id = thermostatDetails[0]
         def thermostatName = thermostatDetails[1]
@@ -1597,7 +1524,6 @@ def iterateSetClimate(tstatType, climateName) {
                 setClimate(tstatlist, climateName)
                 tstatlist = Id
                 nTstats=1
-             
             }
             else {
                 tstatlist = tstatlist + "," + Id
@@ -1620,17 +1546,14 @@ def setClimate(thermostatId, climateName) {
     if (climateName == device.currentValue( "programScheduleName" )) return  // already there!!!
     
     for (i in 0..data.thermostatList.size()-1) {
-        
         def foundClimate=false
         for (j in 0..data.thermostatList[i].program.climates.size()-1) {
-            
             if (climateName.trim().toUpperCase() == data.thermostatList[i].program.climates[j].name.toUpperCase()) {
                 climateRef = data.thermostatList[i].program.climates[j].climateRef // get the corresponding climateRef
                 foundClimate = true
             }
         }
         if (!foundClimate) {
-        
             log.debug "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
             sendEvent name: "verboseTrace", value: "setClimate>Climate ${climateName} not found for thermostatId =${data.thermostatList[i].identifier}"
             return
@@ -1644,7 +1567,6 @@ def setClimate(thermostatId, climateName) {
         if (settings.trace) {
             log.debug "setHold>settings.holdType= ${settings.holdType}"
             sendEvent name: "verboseTrace", value: "setHold>settings.holdType= ${settings.holdType}"
-
         }
         bodyReq = bodyReq + '","holdType":"' + settings.holdType
     }
@@ -1679,7 +1601,6 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, subClimateNa
     def ecobeeType
     
     if ((tstatType =='') || (tstatType ==null)) { // by default, the ecobee type is 'registered'
-    
         ecobeeType = ((settings.ecobeeType != null) && (settings.ecobeeType != "")) ? settings.ecobeeType.trim() : 'registered'
     }
     else {
@@ -1693,7 +1614,6 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, subClimateNa
     sendEvent name: "verboseTrace", value: "iterateUpdateClimate>ecobeeType=${ecobeeType},about to loop ${data.thermostatCount} thermostat(s)"
     }
     for (i in 0..data.thermostatCount-1) {
-    
         def thermostatDetails = data.revisionList[i].split(':')
         def Id = thermostatDetails[0]
         def thermostatName = thermostatDetails[1]
@@ -1703,9 +1623,8 @@ def iterateUpdateClimate(tstatType, climateName, deleteClimateFlag, subClimateNa
         def runtimeRevision = thermostatDetails[5]
          
         if (connected) {
-         
             if (settings.trace) {
-       sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
+       			sendEvent name: "verboseTrace", value: "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
                 log.debug "iterateUpdateClimate> about to call updateClimate for thermostatId =${id}"
             }
             updateClimate(Id, climateName, deleteClimateFlag, subClimateName,coolTemp, heatTemp, isOptimized, coolFan, heatFan)
@@ -1734,7 +1653,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
         thermostatId = settings.thermostatId
     }
     if ((coolTemp != null) && (heatTemp != null)) {
-    
         if (settings.trace) {
              log.debug "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
              sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId} coolTemp=${coolTemp}, heatTemp= ${heatTemp}"
@@ -1745,7 +1663,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             targetHeatTemp = (cToF(heatTemp)*10) as Integer
         }
         else {
-    
             targetCoolTemp = (coolTemp*10) as Integer // need to send temperature in F multiply by 10
             targetHeatTemp = (heatTemp*10) as Integer
         }
@@ -1753,9 +1670,7 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     getThermostatInfo(thermostatId)
  
     if ((substituteClimateName != null) && (substituteClimateName != "")) { // find the subsituteClimateRef for the subsitute Climate Name if not null
-    
         for (i in 0..data.thermostatList[0].program.climates.size()-1) {
-
             if (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase()) {
                 climateRefToBeReplaced = data.thermostatList[0].program.climates[i].climateRef
             }
@@ -1768,7 +1683,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
             }
         }
         if (!foundClimate) {
-        
              if (settings.trace) {
                  log.debug "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
                  sendEvent name: "verboseTrace", value: "updateClimate>substituteClimateName ${substituteClimateName} for substitution not found"
@@ -1776,7 +1690,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
              return
         }
         if (climateRefToBeReplaced == null) {
-        
              if (settings.trace) {
                  log.debug "updateClimate>climateName ${climateName} for substitution not found"
                  sendEvent name: "verboseTrace", value: "updateClimate>climateName ${climateName} for substitution not found"
@@ -1795,7 +1708,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
         // replace the climateRef with right substituteClimateRef if needed
         
         for (j in 0..data.thermostatList[0].program.schedule[i].size()-1) {
-
             if (substituteClimateRef != null) {
                 scheduleAsString = (data.thermostatList[0].program.schedule[i][j] == climateRefToBeReplaced) ?
                     '"' + substituteClimateRef + '"' :
@@ -1812,12 +1724,10 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     
     foundClimate= false
     for (i in 0..data.thermostatList[0].program.climates.size()-1) {
-
         if ((i != 0) && (i < data.thermostatList[0].program.climates.size())) {
                 bodyReq = bodyReq + ','
         }
         if ((deleteClimateFlag=='true') && (climateName.trim().toUpperCase() == data.thermostatList[0].program.climates[i].name.toUpperCase())) {
-
             foundClimate= true
 
             if (settings.trace) {
@@ -1845,7 +1755,6 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
     }
     
     if (!foundClimate) { // this is a new Climate object to create
-
         if (settings.trace) {
             log.debug "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"
             sendEvent name: "verboseTrace", value: "updateClimate>thermostatId =${thermostatId},Climate ${climateName} to be created"
@@ -1870,7 +1779,7 @@ def updateClimate(thermostatId,climateName,deleteClimateFlag,substituteClimateNa
         }
         else {
             log.error "updateClimate>error=${statusCode.toString()}, message = ${message}"
-     sendEvent name: "verboseTrace", value: "updateClimate>error ${statusCode.toString()} for ${climateName}"
+     		sendEvent name: "verboseTrace", value: "updateClimate>error ${statusCode.toString()} for ${climateName}"
         }            
     }
 }
@@ -1890,7 +1799,6 @@ def getThermostatInfo(thermostatId){
         def statusCode = resp.data.status.code
         def message = resp.data.status.message
         if (!statusCode) {
-            
             data.thermostatList = resp.data.thermostatList
             def thermostatName = data.thermostatList[0].name
             // divide the temperature by 10 before for display later.
@@ -1901,7 +1809,6 @@ def getThermostatInfo(thermostatId){
             data.thermostatList[0].weather.forecasts[0].tempLow = data.thermostatList[0].weather.forecasts[0].tempLow/10
 			data.thermostatList[0].weather.forecasts[0].tempHigh = data.thermostatList[0].weather.forecasts[0].tempHigh/10
             if (data.thermostatList[0].events.size()> 0) {
-            
                 for (i in 0..data.thermostatList[0].events.size()-1) {
                     if (data.thermostatList[0].events[i].running) {
                         // Divide the running events' temps by 10 for display later
@@ -1917,7 +1824,6 @@ def getThermostatInfo(thermostatId){
             def thermostatSettings = data.thermostatList[0].settings
 
             if (settings.trace) {
-            
      			sendEvent name: "verboseTrace", value: "getTstatInfo> currentTemp=${runtimeSettings.actualTemperature},${thermostatId},hvacMode = ${thermostatSettings.hvacMode}," +
                     "fan = ${runtimeSettings.desiredFanMode}, fanMinOnTime = ${thermostatSettings.fanMinOnTime}, desiredHeat = ${runtimeSettings.desiredHeat} desiredCool = ${runtimeSettings.desiredCool}," +
                     "current Humidity = ${runtimeSettings.actualHumidity}, desiredHumidity = ${runtimeSettings.desiredHumidity},humidifierMode= ${thermostatSettings.humidifierMode}," +
@@ -2174,7 +2080,6 @@ def setAuthTokens(){
 def isLoggedIn() {
 
     if (data.auth == null) {
-    
         if (settings.trace) {
             log.debug "isLoggedIn> no data auth"
         }
