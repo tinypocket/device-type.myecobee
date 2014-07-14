@@ -473,6 +473,10 @@ def night() {
     goSleep()
 }
 
+def asleep() {
+	gosleep()
+}
+
 def goSleep() {
     setClimate( settings.thermostatId, "Sleep" )
 }
