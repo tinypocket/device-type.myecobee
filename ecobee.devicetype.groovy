@@ -1533,7 +1533,14 @@ def setClimate(thermostatId, climateName) {
     def climateRef=null
     
     getThermostatInfo(thermostatId)
-    if (climateName == device.currentValue( "programScheduleName" )) return  // already there!!!
+    def currentSchedule = device.currentValue( "programScheduleName" )
+    if (currentSchedule == "auto") {
+    	resumeProgram( thermostatId )		// let's drop the current override first
+    	getThermostatInfo(thermostatId)
+    	currentSchedule = device.currentValue( "programScheduleName" )
+    }
+    if (climateName == currentSchedule ) return  // That was easy - we are already there!!!
+    
     for (i in 0..data.thermostatList.size()-1) {
         def foundClimate=false
         for (j in 0..data.thermostatList[i].program.climates.size()-1) {
