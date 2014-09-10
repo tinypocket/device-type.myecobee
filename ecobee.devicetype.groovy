@@ -13,6 +13,7 @@
 * 		- Added home, away, awake, goSleep , programeResume commands
 *		- fixed Temperature tile to use Farenheight
 *		- turned off weather tiles
+*		- added thermostatOperatingState
 *
 * Copyright (C) 2014 Yves Racine <yracine66@gmail.com>
 * Permission is hereby granted, free of charge, to any person obtaining a copy of this
@@ -131,6 +132,7 @@ metadata {
         
         attribute "thermostatModeDisplay", "string"
         attribute "thermostatFanModeDisplay", "string"
+        attribute "thermostatOperatingState", "string"
     }
 
     simulator {
@@ -220,9 +222,9 @@ metadata {
         standardTile("coolLevelDown", "device.coolingSetpoint", canChangeIcon: false, inactiveLabel: false, decoration: "flat") {
             state "coolLevelDown", label:' ', action:"coolLevelDown", icon:"st.thermostat.thermostat-down"
         }
-        valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
-             state "default", label:'${currentValue}'
-        }
+//        valueTile("equipementStatus", "device.equipementStatus", inactiveLabel: false, decoration: "flat", width: 3, height: 1) {
+//             state "default", label:'${currentValue}'
+//        }
         valueTile("fanMinOnTime", "device.fanMinOnTime", inactiveLabel: false, decoration: "flat", width: 1, height: 1) {
             state "default", label:'FanMin\n${currentValue}'
         }
@@ -257,7 +259,7 @@ metadata {
         			"temperature", "modeDisplay", "fanModeDisplay",
        				"humidity", "programScheduleName", "programType",
         			"fanMinOnTime", "heatingSetpoint", "coolingSetpoint",
-                    "equipementStatus",
+                  /*  "equipementStatus", */
                     "refresh","programEndTimeMsg",
                     "programCoolTemp", "coolLevelDown", "coolLevelUp",
                     "programHeatTemp", "heatLevelDown", "heatLevelUp", 
@@ -625,7 +627,7 @@ def poll() {
     }
     def equipStatus = (data.thermostatList[0].equipmentStatus.size() != 0)? data.thermostatList[0].equipmentStatus + ' running': 'Idle'
     
-    sendEvent(name: 'equipementStatus', value: equipStatus)
+//    sendEvent(name: 'equipementStatus', value: equipStatus)
 
 	def currentMode = data.thermostatList[0].settings.hvacMode
     def modeDisplay = 'off'
@@ -639,14 +641,22 @@ def poll() {
     	modeDisplay = equipStatus.contains( 'Heat' )? 'heatOn' : ( equipStatus.contains( 'Cool' )? 'coolOn' : 'auto' )
     }
     sendEvent(name: 'thermostatModeDisplay', value: modeDisplay)
-
+    
+    def currentOpState = 'idle'
+    
+    currentOpState = modeDisplay.contains('heatOn')? 'heating' : (modeDisplay.contains('coolOn')? 'cooling' : 'idle' )
+    
     if ( currentFanMode == 'auto' ) {
     	modeDisplay = equipStatus.contains( 'fan' )? 'autoOn' : 'auto'
     }
     else {
     	modeDisplay = equipStatus.contains( 'fan' )? 'onOn' : 'on'
    	}
+    
+    if ( (currentOpState == 'idle') && modeDisplay.contains( 'On' ) ) { currentOpState = 'fan only' }
     sendEvent( name: 'thermostatFanModeDisplay', value: modeDisplay )
+    sendEvent( name: 'thermostatOperatingState', value: currentOpState)
+    
 
     // post alerts
     def alerts = null
